@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,8 +18,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        requestNotificationAuthorization()
+        registerQuestionNotificationCategory()
+        clearBadgeNumber()
+        
         return true
     }
+    
+    private func requestNotificationAuthorization() {
+        let notificationCenter = UNUserNotificationCenter.current()
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, _) in
+            guard granted else { return }
+            
+            self.registerRemoteNotifications()
+        }
+    }
+    
+    private func registerRemoteNotifications() {
+        DispatchQueue.main.async {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("Device Token: \(token)")
+    }
+    
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register remote notifications: \(error)")
+    }
+    
+    private func registerQuestionNotificationCategory() {
+        let questionCategory =  UNNotificationCategory(identifier: "question",
+                                                       actions: [],
+                                                       intentIdentifiers: [],
+                                                       options: [])
+        
+        UNUserNotificationCenter.current().setNotificationCategories([questionCategory])
+    }
+    
+    private func clearBadgeNumber() {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+    }
+
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
