@@ -6,6 +6,8 @@
 //  Copyright © 2019 Sanjay.Chaurasia. All rights reserved.
 //
 
+// Source : https://blog.undabot.com/rich-ios-notifications-with-custom-input-interface-9e5ff4719058
+
 import UIKit
 import CoreData
 import UserNotifications
